@@ -1,0 +1,476 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Остов — объекты</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Golos+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: монохромная выставка — чёрные залы чередуются с белыми, предметы стоят в квадратных «витринах» сетки */
+:root{
+  --ink:#0b0b0b;
+  --paper:#f4f4f2;
+  --grey:#8a8a87;
+  --line:rgba(11,11,11,.14);
+  --line-inv:rgba(244,244,242,.16);
+  --display:"Dela Gothic One","Arial Black",Impact,sans-serif;
+  --body:"Golos Text",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --gut-l:max(16px, env(safe-area-inset-left, 0px));
+  --gut-r:max(16px, env(safe-area-inset-right, 0px));
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;overflow-x:hidden}
+@media (hover:hover) and (pointer:fine){ body.has-cursor, body.has-cursor a, body.has-cursor button{cursor:none} }
+::selection{background:var(--ink);color:var(--paper)}
+a{color:inherit}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid currentColor;outline-offset:4px}
+
+.wrap{padding-left:var(--gut-l);padding-right:var(--gut-r);max-width:1400px;margin:0 auto}
+.dark{background:var(--ink);color:var(--paper)}
+.label{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase}
+
+/* GL canvas over the page, but under the UI */
+#gl{position:fixed;inset:0;width:100%;height:100%;z-index:5;pointer-events:none}
+
+/* header */
+header{position:fixed;top:0;left:0;right:0;z-index:30;mix-blend-mode:difference;color:#fff;
+  padding-top:calc(env(safe-area-inset-top, 0px) + 18px)}
+header .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:0}
+.logo{font-family:var(--display);font-size:22px;letter-spacing:.02em;text-decoration:none}
+nav{display:flex;gap:28px}
+nav a{text-decoration:none;font-size:14px;position:relative}
+nav a::after{content:"";position:absolute;left:0;right:0;bottom:-3px;height:1px;background:currentColor;transform:scaleX(0);transform-origin:right;transition:transform .45s cubic-bezier(.7,0,.2,1)}
+nav a:hover::after{transform:scaleX(1);transform-origin:left}
+.hdr-right{display:flex;align-items:center;gap:18px}
+.snd{display:flex;align-items:center;gap:10px;background:none;border:1px solid currentColor;border-radius:99px;padding:7px 14px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+.bars{display:flex;gap:2px;align-items:flex-end;height:12px}
+.bars i{width:2px;height:3px;background:currentColor;display:block;transition:height .2s}
+.snd.on .bars i{animation:eq 1s ease-in-out infinite}
+.snd.on .bars i:nth-child(2){animation-delay:-.3s}.snd.on .bars i:nth-child(3){animation-delay:-.6s}.snd.on .bars i:nth-child(4){animation-delay:-.15s}
+@keyframes eq{0%,100%{height:3px}50%{height:12px}}
+.cart{font-family:var(--mono);font-size:12px;letter-spacing:.08em;display:flex;gap:8px;align-items:center}
+.cart b{display:inline-grid;place-items:center;min-width:22px;height:22px;border-radius:99px;background:#fff;color:#000;font-weight:500;font-size:11px}
+.cart b.bump{animation:bump .5s cubic-bezier(.3,1.6,.5,1)}
+@keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.6)}100%{transform:scale(1)}}
+@media (max-width:760px){nav{display:none}.snd .t{display:none}}
+
+/* hero */
+.hero .wrap{padding-block:calc(env(safe-area-inset-top, 0px) + 120px) 72px;display:grid;grid-template-columns:1.15fr .85fr;gap:24px;align-items:center}
+.hero h1{font-family:var(--display);font-weight:400;font-size:clamp(48px,9vw,138px);line-height:.92;letter-spacing:-.01em;margin:0;text-wrap:balance}
+.hero h1 .ln{display:block;overflow:hidden}
+.hero h1 .ch{display:inline-block;animation:chUp 1s cubic-bezier(.2,.9,.2,1) both}
+@keyframes chUp{from{transform:translateY(105%) rotate(6deg)}to{transform:none}}
+.hero p.lead{max-width:44ch;color:#bdbdba;margin:28px 0 36px;font-size:18px;animation:fade 1.2s .7s both}
+@keyframes fade{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.hero-view{aspect-ratio:1/1;width:100%;max-width:100%;position:relative}
+.hero-view .cap{position:absolute;left:0;bottom:0;color:var(--grey)}
+.hero-meta{display:flex;flex-wrap:wrap;gap:12px;align-items:center;animation:fade 1.2s .9s both}
+.btn{display:inline-flex;align-items:center;gap:12px;padding:16px 26px;border-radius:99px;border:1px solid currentColor;background:transparent;text-decoration:none;font-weight:500;font-size:15px;position:relative;overflow:hidden;transition:color .4s;will-change:transform}
+.btn{--fill:var(--ink);--on:var(--paper)}
+.dark .btn{--fill:var(--paper);--on:var(--ink)}
+.btn::before{content:"";position:absolute;inset:0;background:var(--fill);transform:translateY(101%);transition:transform .45s cubic-bezier(.7,0,.2,1);z-index:-1}
+.btn{isolation:isolate}
+.btn:hover{color:var(--on)}
+.btn:hover::before{transform:none}
+.btn.solid{background:var(--paper);color:var(--ink);border-color:var(--paper);--fill:var(--ink);--on:var(--paper)}
+.btn .arr{transition:transform .4s}
+.btn:hover .arr{transform:translateX(4px) rotate(-45deg)}
+@media (max-width:820px){.hero .wrap{grid-template-columns:1fr;padding-top:calc(env(safe-area-inset-top, 0px) + 96px)}.hero-view{max-width:420px;justify-self:center}}
+
+/* marquee */
+.marquee{border-block:1px solid var(--line);overflow:hidden;white-space:nowrap;padding-block:18px;background:var(--paper)}
+.marquee .track{display:inline-flex;gap:48px;font-family:var(--display);font-size:clamp(28px,4vw,52px);will-change:transform}
+.marquee .track span{display:inline-flex;align-items:center;gap:48px}
+.marquee .track span::after{content:"";width:.42em;height:.42em;border:2px solid currentColor;transform:rotate(45deg)}
+
+/* catalog */
+.sec-head{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;padding-block:96px 40px}
+.sec-head h2{font-family:var(--display);font-weight:400;font-size:clamp(36px,5.4vw,80px);line-height:1;margin:0;text-wrap:balance}
+.sec-head p{max-width:38ch;margin:0;color:#4d4d4a}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);border-left:1px solid var(--line);margin-bottom:96px}
+.card{border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:20px;display:flex;flex-direction:column;gap:14px;position:relative;min-width:0;transition:background .5s}
+.card::before{content:"";position:absolute;inset:0;background:#e9e9e6;opacity:0;transition:opacity .5s;z-index:-1}
+.card{isolation:isolate}
+.card:hover::before,.card.active::before{opacity:1}
+.card-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.card .view{aspect-ratio:1/1;width:100%;max-width:100%}
+.card h3{font-family:var(--display);font-weight:400;font-size:30px;margin:0;line-height:1}
+.card .price{font-family:var(--mono);font-size:15px;font-variant-numeric:tabular-nums}
+.specs{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;font-family:var(--mono);font-size:12px;margin:0;color:#4d4d4a;font-variant-numeric:tabular-nums}
+.specs dt{color:var(--grey)}
+.specs dd{margin:0}
+.add{margin-top:auto;align-self:flex-start;padding:11px 20px;font-size:14px;color:var(--ink)}
+.add.done{background:var(--ink);color:var(--paper)}
+.hint{position:absolute;top:20px;right:20px;font-family:var(--mono);font-size:11px;color:var(--grey);opacity:0;transform:translateY(-4px);transition:.4s}
+.card:hover .hint{opacity:1;transform:none}
+@media (max-width:980px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:600px){.grid{grid-template-columns:1fr}}
+
+/* statement */
+.statement .wrap{display:grid;grid-template-columns:.9fr 1.1fr;gap:40px;align-items:center;padding-block:96px}
+.statement .view{aspect-ratio:1/1;width:100%;max-width:100%}
+.statement blockquote{margin:0;font-family:var(--display);font-size:clamp(30px,4.2vw,62px);line-height:1.05;text-wrap:balance}
+.statement blockquote em{font-style:normal;-webkit-text-stroke:1.5px var(--paper);color:transparent}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:48px;border-top:1px solid var(--line-inv);padding-top:24px}
+.stats b{display:block;font-family:var(--display);font-weight:400;font-size:clamp(32px,4vw,56px);font-variant-numeric:tabular-nums;line-height:1}
+.stats span{color:#a5a5a2;font-size:14px}
+@media (max-width:820px){.statement .wrap{grid-template-columns:1fr}.statement .view{max-width:360px;justify-self:center}}
+
+/* process */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--line);margin-bottom:96px}
+.step{padding:28px 24px 28px 0;border-right:1px solid var(--line);min-width:0;position:relative;overflow:hidden}
+.step+.step{padding-left:24px}
+.step:last-child{border-right:0}
+.step .n{font-family:var(--display);font-size:72px;line-height:1;color:transparent;-webkit-text-stroke:1.5px var(--ink);transition:color .5s}
+.step:hover .n{color:var(--ink)}
+.step h3{font-size:22px;margin:18px 0 8px;font-weight:600}
+.step p{margin:0;color:#4d4d4a;max-width:34ch}
+.step .dur{margin-top:16px;color:var(--grey)}
+.step .bar{position:absolute;left:0;top:-1px;height:2px;background:var(--ink);width:0;transition:width .9s cubic-bezier(.7,0,.2,1)}
+.step:hover .bar{width:100%}
+@media (max-width:820px){.steps{grid-template-columns:1fr}.step,.step+.step{padding:28px 0;border-right:0;border-bottom:1px solid var(--line)}}
+
+/* footer */
+footer .wrap{padding-block:96px calc(env(safe-area-inset-bottom, 0px) + 32px)}
+.big-mail{font-family:var(--display);font-size:clamp(30px,7vw,110px);line-height:1;margin:24px 0 32px;word-break:break-word;user-select:all}
+.foot-row{display:flex;flex-wrap:wrap;gap:24px;justify-content:space-between;align-items:center;border-top:1px solid var(--line-inv);padding-top:24px;margin-top:72px;color:#a5a5a2;font-size:14px}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom, 0px) + 24px);transform:translate(-50%,140%);background:var(--ink);color:var(--paper);border:1px solid var(--line-inv);padding:12px 20px;border-radius:99px;z-index:40;font-family:var(--mono);font-size:12px;letter-spacing:.06em;transition:transform .5s cubic-bezier(.3,1.4,.5,1)}
+.toast.show{transform:translate(-50%,0)}
+
+/* reveal: visible at rest, animates in only when it enters */
+.rv.go{animation:rise .9s cubic-bezier(.2,.9,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:none}}
+
+/* cursor */
+.cur,.cur-dot{position:fixed;top:0;left:0;z-index:50;pointer-events:none;border-radius:50%;mix-blend-mode:difference;display:none}
+.cur{width:38px;height:38px;border:1px solid #fff;margin:-19px 0 0 -19px;transition:width .35s,height .35s,margin .35s,background .35s}
+.cur-dot{width:6px;height:6px;background:#fff;margin:-3px 0 0 -3px}
+.cur.big{width:84px;height:84px;margin:-42px 0 0 -42px;background:#fff}
+body.has-cursor .cur,body.has-cursor .cur-dot{display:block}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  html{scroll-behavior:auto}
+}
+</style>
+
+<canvas id="gl" aria-hidden="true"></canvas>
+<div class="cur" aria-hidden="true"></div><div class="cur-dot" aria-hidden="true"></div>
+
+<header>
+  <div class="wrap">
+    <a class="logo" href="#top" data-snd="tick">ОСТОВ</a>
+    <nav aria-label="Разделы">
+      <a href="#catalog" data-snd="tick">Объекты</a>
+      <a href="#process" data-snd="tick">Процесс</a>
+      <a href="#contact" data-snd="tick">Контакт</a>
+    </nav>
+    <div class="hdr-right">
+      <button class="snd" id="snd" aria-pressed="false"><span class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="t">Звук выкл</span></button>
+      <span class="cart">КОРЗИНА <b id="cartN">0</b></span>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero dark">
+    <div class="wrap">
+      <div>
+        <p class="label" style="color:#8a8a87;margin:0 0 24px">Студия объектов · Красноярск · с 2019</p>
+        <h1 aria-label="Форма без лишнего"><span class="ln" data-split>ФОРМА</span><span class="ln" data-split>БЕЗ</span><span class="ln" data-split>ЛИШНЕГО</span></h1>
+        <p class="lead">Отливаем предметы из гипса, бетона и мрамора тиражом по 40 штук. Каждый шлифуется вручную до зерна P400 и получает номер.</p>
+        <div class="hero-meta">
+          <a class="btn solid mag" href="#catalog" data-snd="click">Смотреть объекты <span class="arr">→</span></a>
+          <span class="label" style="color:#8a8a87">Наведите на предмет</span>
+        </div>
+      </div>
+      <div class="hero-view view" data-shape="knot" data-dark="1" data-scale="1.12" data-note="196">
+        <span class="cap label">Узел № 01 / гипс</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="marquee" aria-hidden="true"><div class="track" id="track">
+    <span>ГИПС Г-16</span><span>БЕТОН М400</span><span>МРАМОР КОЭЛЬГА</span><span>ТИРАЖ 40</span><span>ШЛИФОВКА P400</span>
+    <span>ГИПС Г-16</span><span>БЕТОН М400</span><span>МРАМОР КОЭЛЬГА</span><span>ТИРАЖ 40</span><span>ШЛИФОВКА P400</span>
+  </div></div>
+
+  <section id="catalog">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <h2>Шесть форм<br>осенней серии</h2>
+        <p>Каждый предмет звучит по-своему. Проведите курсором по витринам слева направо.</p>
+      </div>
+      <div class="grid" id="grid"></div>
+    </div>
+  </section>
+
+  <section class="statement dark">
+    <div class="wrap">
+      <div class="view" data-shape="ico" data-dark="1" data-wire="1" data-scale="1.15" data-note="130.8"></div>
+      <div class="rv">
+        <blockquote>Мы убираем всё, <em>кроме</em> того, что держит форму.</blockquote>
+        <div class="stats">
+          <div><b data-count="40">0</b><span>экземпляров в тираже</span></div>
+          <div><b data-count="3">0</b><span>часа ручной шлифовки на предмет</span></div>
+          <div><b data-count="400" data-pre="P">P0</b><span>финальное зерно</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="process">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <h2>Как появляется<br>предмет</h2>
+        <p>Гипс готов за 7–10 дней, бетон за 2–3 недели, мрамор за 3–4 недели. Порядок шагов не меняется.</p>
+      </div>
+      <div class="steps">
+        <div class="step rv" data-snd="hover-chime"><span class="bar"></span><div class="n">1</div><h3>Эскиз и модель</h3><p>Форму ищем на бумаге, затем моделируем и печатаем мастер-модель из пластика.</p><div class="dur label">2–3 дня</div></div>
+        <div class="step rv" data-snd="hover-chime"><span class="bar"></span><div class="n">2</div><h3>Форма и отливка</h3><p>Отливаем гипс или бетон в силиконовую форму и сушим. Мраморные предметы вырезаем фрезой из цельного блока.</p><div class="dur label">4 дня — 3 недели</div></div>
+        <div class="step rv" data-snd="hover-chime"><span class="bar"></span><div class="n">3</div><h3>Шлифовка</h3><p>Проходим поверхность зерном от P120 до P400, гравируем номер экземпляра на дне.</p><div class="dur label">1–2 дня</div></div>
+      </div>
+    </div>
+  </section>
+
+  <footer id="contact" class="dark">
+    <div class="wrap">
+      <p class="label" style="color:#8a8a87;margin:0">Заказ, сотрудничество, выставки</p>
+      <div class="big-mail rv">hello@ostov.studio</div>
+      <button class="btn mag" id="copy" data-snd="click">Скопировать адрес <span class="arr">→</span></button>
+      <div class="foot-row">
+        <span>© 2026 Остов. Все права защищены.</span>
+        <span class="label">Three.js · Web Audio</span>
+      </div>
+    </div>
+  </footer>
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- data ---------- */
+const items = [
+  {name:'Узел', shape:'knot', mat:'Гипс Г-16', size:'180 × 180 × 120 мм', mass:'1,2 кг', ed:'14 / 40', time:'7–10 дней', price:'4 900 ₽', note:220},
+  {name:'Кристалл', shape:'ico', mat:'Мрамор, Коэльга', size:'140 × 140 × 140 мм', mass:'2,1 кг', ed:'03 / 40', time:'3–4 недели', price:'12 500 ₽', note:261.6},
+  {name:'Монолит', shape:'box', mat:'Бетон М400', size:'90 × 90 × 220 мм', mass:'3,4 кг', ed:'27 / 40', time:'2–3 недели', price:'3 900 ₽', note:293.7},
+  {name:'Кольцо', shape:'torus', mat:'Гипс Г-16', size:'240 × 240 × 60 мм', mass:'1,6 кг', ed:'09 / 40', time:'7–10 дней', price:'3 600 ₽', note:329.6},
+  {name:'Шпиль', shape:'cone', mat:'Бетон М400', size:'110 × 110 × 260 мм', mass:'2,8 кг', ed:'31 / 40', time:'2–3 недели', price:'3 200 ₽', note:392},
+  {name:'Октаэдр', shape:'octa', mat:'Мрамор, Коэльга', size:'160 × 160 × 160 мм', mass:'2,6 кг', ed:'01 / 40', time:'3–4 недели', price:'14 000 ₽', note:440},
+];
+const grid = document.getElementById('grid');
+grid.innerHTML = items.map((it,i)=>`
+  <article class="card rv" data-i="${i}">
+    <span class="hint">вращать ↻</span>
+    <div class="card-top"><h3>${it.name}</h3><span class="price">${it.price}</span></div>
+    <div class="view" data-shape="${it.shape}" data-note="${it.note}"></div>
+    <dl class="specs"><dt>Материал</dt><dd>${it.mat}</dd><dt>Габарит</dt><dd>${it.size}</dd><dt>Масса</dt><dd>${it.mass}</dd><dt>Экземпляр</dt><dd>${it.ed}</dd><dt>Изготовление</dt><dd>${it.time}</dd></dl>
+    <button class="btn add" id="add-${i}" data-snd="click">В корзину</button>
+  </article>`).join('');
+
+/* split hero letters */
+let d = 0;
+document.querySelectorAll('[data-split]').forEach(el=>{
+  el.innerHTML = [...el.textContent].map(c=>`<span class="ch" style="animation-delay:${(d++*0.045).toFixed(3)}s">${c}</span>`).join('');
+  el.setAttribute('aria-hidden','true');
+});
+
+/* ---------- audio ---------- */
+let ac=null, master=null, noiseBuf=null, soundOn=false, userOff=false, drone=null;
+function initAudio(){
+  if(ac) return;
+  const AC = window.AudioContext||window.webkitAudioContext; if(!AC) return;
+  ac = new AC(); master = ac.createGain(); master.gain.value = .7; master.connect(ac.destination);
+  noiseBuf = ac.createBuffer(1, ac.sampleRate, ac.sampleRate);
+  const ch = noiseBuf.getChannelData(0); for(let i=0;i<ch.length;i++) ch[i]=Math.random()*2-1;
+}
+function env(g,t,a,dd,peak){g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(peak,t+a);g.gain.exponentialRampToValueAtTime(.0001,t+a+dd);}
+function noise(t,dur,f1,f2,peak,q=2){
+  const s=ac.createBufferSource(); s.buffer=noiseBuf;
+  const bp=ac.createBiquadFilter(); bp.type='bandpass'; bp.Q.value=q;
+  bp.frequency.setValueAtTime(f1,t); bp.frequency.exponentialRampToValueAtTime(f2,t+dur);
+  const g=ac.createGain(); env(g,t,dur*.3,dur*.7,peak);
+  s.connect(bp).connect(g).connect(master); s.start(t); s.stop(t+dur+.05);
+}
+function osc(type,t,f1,f2,dur,peak,a=.005){
+  const o=ac.createOscillator(); o.type=type; o.frequency.setValueAtTime(f1,t);
+  if(f2!==f1) o.frequency.exponentialRampToValueAtTime(f2,t+dur);
+  const g=ac.createGain(); env(g,t,a,dur,peak); o.connect(g).connect(master); o.start(t); o.stop(t+dur+.05);
+}
+const S = {
+  tick(){ if(!soundOn) return; const t=ac.currentTime; osc('sine',t,2600,2600,.04,.06,.002); },
+  click(){ if(!soundOn) return; const t=ac.currentTime; osc('sine',t,160,50,.16,.45); noise(t,.05,3500,2000,.12,1); },
+  spin(f){ if(!soundOn) return; const t=ac.currentTime;
+    osc('triangle',t,f,f*2,.55,.11,.03); osc('sine',t,f*1.5,f*3,.5,.04,.05);
+    noise(t,.6,300,4000,.14,3); },
+  chime(f=880){ if(!soundOn) return; const t=ac.currentTime; osc('sine',t,f,f,1.1,.05,.01); osc('sine',t+.06,f*1.5,f*1.5,1.0,.035,.01); },
+  thud(){ if(!soundOn) return; const t=ac.currentTime; osc('sine',t,90,40,.4,.35); noise(t,.12,800,200,.1,1); },
+};
+function startDrone(){
+  if(drone||!ac) return;
+  const g=ac.createGain(); g.gain.value=0; const lp=ac.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=320;
+  const os=[55,55.35,110.2].map(f=>{const o=ac.createOscillator(); o.type='sine'; o.frequency.value=f; o.connect(lp); o.start(); return o;});
+  lp.connect(g).connect(master); g.gain.linearRampToValueAtTime(.035, ac.currentTime+2.5);
+  drone={g,os};
+}
+function stopDrone(){ if(!drone) return; const {g,os}=drone; g.gain.linearRampToValueAtTime(0, ac.currentTime+.6); setTimeout(()=>os.forEach(o=>o.stop()),700); drone=null; }
+const sndBtn=document.getElementById('snd');
+function setSound(on){
+  initAudio(); if(!ac) return;
+  if(ac.state==='suspended') ac.resume();
+  soundOn=on; sndBtn.classList.toggle('on',on); sndBtn.setAttribute('aria-pressed',on);
+  sndBtn.querySelector('.t').textContent = on?'Звук вкл':'Звук выкл';
+  on ? (startDrone(), S.chime(660)) : stopDrone();
+}
+sndBtn.addEventListener('click',e=>{ e.stopPropagation(); userOff = soundOn; setSound(!soundOn); });
+window.addEventListener('pointerdown',()=>{ if(!soundOn && !userOff) setSound(true); },{once:true});
+
+/* sound hooks */
+document.addEventListener('pointerover',e=>{
+  const el=e.target.closest('[data-snd]'); if(!el || el.contains(e.relatedTarget)) return;
+  if(el.dataset.snd==='hover-chime') S.chime(523.3 + [...el.parentNode.children].indexOf(el)*130);
+  else S.tick();
+});
+document.addEventListener('click',e=>{ const el=e.target.closest('[data-snd="click"]'); if(el) S.click(); });
+
+/* ---------- cart & copy ---------- */
+let cart=0; const cartN=document.getElementById('cartN');
+grid.addEventListener('click',e=>{
+  const b=e.target.closest('.add'); if(!b) return;
+  cart++; cartN.textContent=cart; cartN.classList.remove('bump'); void cartN.offsetWidth; cartN.classList.add('bump');
+  b.textContent='Добавлено'; b.classList.add('done');
+  const v = views.find(v=>v.el===b.closest('.card').querySelector('.view')); if(v){ v.impulse=14; }
+  clearTimeout(b._t); b._t=setTimeout(()=>{b.textContent='В корзину'; b.classList.remove('done');},1600);
+});
+const toast=document.getElementById('toast');
+function showToast(m){ toast.textContent=m; toast.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>toast.classList.remove('show'),2200); }
+document.getElementById('copy').addEventListener('click',()=>{
+  const txt='hello@ostov.studio';
+  const sel=()=>{ const r=document.createRange(); r.selectNodeContents(document.querySelector('.big-mail')); const s=getSelection(); s.removeAllRanges(); s.addRange(r); };
+  try{ navigator.clipboard.writeText(txt).then(()=>showToast('Адрес скопирован'),()=>{sel();showToast('Адрес выделен — нажмите Ctrl+C');}); }
+  catch(_){ sel(); showToast('Адрес выделен — нажмите Ctrl+C'); }
+});
+
+/* ---------- cursor & magnets ---------- */
+const fine = matchMedia('(hover:hover) and (pointer:fine)').matches;
+const cur=document.querySelector('.cur'), dot=document.querySelector('.cur-dot');
+let mx=innerWidth/2, my=innerHeight/2, cx=mx, cy=my;
+if(fine){ document.body.classList.add('has-cursor'); }
+addEventListener('pointermove',e=>{ mx=e.clientX; my=e.clientY; dot.style.transform=`translate(${mx}px,${my}px)`; });
+document.addEventListener('pointerover',e=>{ cur.classList.toggle('big', !!e.target.closest('a,button,.view')); });
+document.querySelectorAll('.mag').forEach(b=>{
+  b.addEventListener('pointermove',e=>{ if(!fine) return; const r=b.getBoundingClientRect(); b.style.transform=`translate(${(e.clientX-r.left-r.width/2)*.25}px,${(e.clientY-r.top-r.height/2)*.35}px)`; });
+  b.addEventListener('pointerleave',()=>{ b.style.transition='transform .6s cubic-bezier(.3,1.6,.5,1),color .4s'; b.style.transform=''; setTimeout(()=>b.style.transition='',600); });
+});
+
+/* ---------- reveal & counters ---------- */
+const io=new IntersectionObserver(es=>es.forEach(en=>{
+  if(!en.isIntersecting) return; const el=en.target; io.unobserve(el);
+  if(el.classList.contains('rv') && !reduce){ const sib=[...el.parentNode.children].filter(c=>c.classList.contains('rv')); el.style.animationDelay=(Math.max(0,sib.indexOf(el))%3*0.1)+'s'; el.classList.add('go'); }
+  el.querySelectorAll?.('[data-count]').forEach(countUp);
+}),{rootMargin:'0px 0px 8% 0px'});
+document.querySelectorAll('.rv').forEach(el=>{ if(el.getBoundingClientRect().top>innerHeight) io.observe(el); else el.querySelectorAll('[data-count]').forEach(countUp); });
+function countUp(b){
+  if(b._done) return; b._done=1; const to=+b.dataset.count, pre=b.dataset.pre||'', t0=performance.now(), dur=reduce?1:1400;
+  (function f(t){ const p=Math.min(1,(t-t0)/dur), e=1-Math.pow(1-p,3); b.textContent=pre+Math.round(to*e); if(p<1) requestAnimationFrame(f); else S.tick(); })(t0);
+}
+
+/* ---------- marquee driven by scroll velocity ---------- */
+const track=document.getElementById('track'); let mOff=0, lastY=scrollY, vel=0;
+
+/* ---------- three.js: one renderer, many views ---------- */
+const canvas=document.getElementById('gl');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setClearColor(0x000000,0);
+
+function geo(shape){
+  switch(shape){
+    case 'knot': return new THREE.TorusKnotGeometry(.8,.28,180,18,2,3);
+    case 'ico': return new THREE.IcosahedronGeometry(1.35,0);
+    case 'box': return new THREE.BoxGeometry(1,2.3,1);
+    case 'torus': return new THREE.TorusGeometry(1.1,.38,16,48);
+    case 'cone': return new THREE.ConeGeometry(.95,2.4,4,1);
+    case 'octa': return new THREE.OctahedronGeometry(1.4,0);
+  }
+}
+const views=[];
+document.querySelectorAll('.view').forEach((el,i)=>{
+  const dark=!!el.dataset.dark, wire=!!el.dataset.wire;
+  const scene=new THREE.Scene();
+  const cam=new THREE.PerspectiveCamera(32,1,.1,50); cam.position.set(0,0,7.2);
+  scene.add(new THREE.AmbientLight(0xffffff, dark?.35:.25));
+  const k=new THREE.DirectionalLight(0xffffff, dark?1.1:1.6); k.position.set(3,4,5); scene.add(k);
+  const r=new THREE.DirectionalLight(0xffffff,.35); r.position.set(-4,-2,-3); scene.add(r);
+  const g=geo(el.dataset.shape);
+  const group=new THREE.Group(); scene.add(group);
+  if(!wire){
+    const m=new THREE.MeshStandardMaterial({color: dark?0xeeeeec:0x161616, roughness: dark?.65:.38, metalness:.05, flatShading:true});
+    group.add(new THREE.Mesh(g,m));
+  }
+  const thresh = el.dataset.shape==='knot'||el.dataset.shape==='torus' ? 35 : 1;
+  const lines=new THREE.LineSegments(new THREE.EdgesGeometry(wire?new THREE.IcosahedronGeometry(1.4,1):g, thresh),
+    new THREE.LineBasicMaterial({color: dark?0x0b0b0b:0xffffff, transparent:true, opacity: wire?1:(dark?.35:.18)}));
+  if(wire){ lines.material.color.set(0xf4f4f2); lines.material.opacity=.9;
+    const inner=new THREE.Mesh(new THREE.IcosahedronGeometry(.7,0), new THREE.MeshStandardMaterial({color:0xf4f4f2,flatShading:true,roughness:.5}));
+    group.add(inner); group.userData.inner=inner; }
+  group.add(lines);
+  const s=+(el.dataset.scale||1); group.scale.setScalar(s);
+  group.rotation.set(.4, i*.7, .1);
+  const v={el,scene,cam,group,base:s,hover:false,speed:.35,impulse:0,tx:0,ty:0,note:+el.dataset.note||220,touchT:0};
+  views.push(v);
+  const host = el.closest('.card') || el;
+  host.addEventListener('pointerenter',e=>{ if(e.pointerType==='touch') return; v.hover=true; host.classList.add('active'); S.spin(v.note); });
+  host.addEventListener('pointerleave',()=>{ v.hover=false; host.classList.remove('active'); });
+  el.addEventListener('pointermove',e=>{ const r=el.getBoundingClientRect(); v.tx=((e.clientY-r.top)/r.height-.5)*.8; v.ty=((e.clientX-r.left)/r.width-.5)*.8; });
+  el.addEventListener('click',()=>{ v.impulse=18; S.thud(); });
+  el.addEventListener('touchstart',()=>{ v.touchT=performance.now()+1400; host.classList.add('active'); S.spin(v.note); setTimeout(()=>host.classList.remove('active'),1400); },{passive:true});
+});
+
+let W=0,H=0;
+function resize(){ W=canvas.clientWidth; H=canvas.clientHeight; renderer.setSize(W,H,false); }
+resize(); addEventListener('resize',resize);
+
+let last=performance.now();
+function frame(now){
+  const dt=Math.min(.05,(now-last)/1000); last=now;
+
+  // cursor ring
+  cx+=(mx-cx)*.18; cy+=(my-cy)*.18; cur.style.transform=`translate(${cx}px,${cy}px)`;
+
+  // marquee
+  const y=scrollY; vel += ((y-lastY) - vel)*.1; lastY=y;
+  if(!reduce){ mOff -= (40 + Math.abs(vel)*12)*dt; const half=track.scrollWidth/2; if(-mOff>half) mOff+=half; track.style.transform=`translateX(${mOff}px)`; }
+
+  renderer.setScissorTest(false); renderer.clear(); renderer.setScissorTest(true);
+  for(const v of views){
+    const r=v.el.getBoundingClientRect();
+    const active = v.hover || now < v.touchT;
+    const target = reduce ? (active?2:0) : (active?7:.35);
+    v.speed += (target - v.speed)*Math.min(1,dt*(active?4:1.6));
+    v.impulse *= Math.pow(.04,dt);
+    v.group.rotation.y += (v.speed + v.impulse)*dt;
+    v.group.rotation.x += ((active?v.tx:0)+.35 - v.group.rotation.x)*dt*3;
+    v.group.rotation.z += ((active?-v.ty*.5:.1) - v.group.rotation.z)*dt*3;
+    if(v.group.userData.inner) v.group.userData.inner.rotation.x -= (v.speed*1.6+v.impulse)*dt;
+    const sc = v.base*(active?1.08:1) + Math.sin(now*.0012)*.015;
+    v.group.scale.setScalar(v.group.scale.x + (sc - v.group.scale.x)*dt*6);
+    v.group.position.y = Math.sin(now*.001 + v.note)*.06;
+    if(r.bottom<0||r.top>H||r.right<0||r.left>W||r.width===0) continue;
+    v.cam.aspect=r.width/r.height; v.cam.updateProjectionMatrix();
+    renderer.setViewport(r.left,H-r.bottom,r.width,r.height);
+    renderer.setScissor(r.left,H-r.bottom,r.width,r.height);
+    renderer.render(v.scene,v.cam);
+  }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+})();
+</script>
+
+</body></html>
